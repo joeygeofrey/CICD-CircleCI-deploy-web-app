@@ -23,7 +23,6 @@ jobs:
             npm install
             npm run build
             exit 1
-
   build_backend:
     docker:
       - image: circleci/node:13.8.0
@@ -37,7 +36,7 @@ jobs:
             npm run build
             exit 1
 
-worflows:
+workflows:
   app_deploy_workflow:
     jobs:
       - build_frontend
