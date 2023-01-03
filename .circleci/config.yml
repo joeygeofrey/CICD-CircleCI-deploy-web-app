@@ -9,14 +9,36 @@ commands:
           command: |
             aws cloudformation delete-stack --stack-name YOURSTACKNAMEHERE-${CIRCLE_WORKFLOW_ID:0:7}
             exit 1
-  revert_migrations:
-    steps:
-      - run:
-          name: Revert Migrations
-          when:
-          command: |
-            
 
 jobs:
+  build_frontend:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - run:
+          name: Build Frontend
+          command: |
+            cd frontend
+            npm install
+            npm run build
+            exit 1
+
+  build_backend:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - run:
+          name: Build Backend
+          command: |
+            cd backend
+            npm install
+            npm run build
+            exit 1
 
 worflows:
+  app_deploy_workflow:
+    jobs:
+      - build_frontend
+      - build_backend
