@@ -30,12 +30,7 @@ jobs:
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
-      - slack/notify:
-          event: fail
-          template: basic_fail_1
-      - slack/notify:
-          event: pass
-          template: basic_success_1
+
   build_backend:
     docker:
       - image: circleci/node:13.8.0
@@ -52,12 +47,7 @@ jobs:
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
-      - slack/notify:
-          event: fail
-          template: basic_fail_1
-      - slack/notify:
-          event: pass
-          template: basic_success_1
+
   test_frontend:
     docker:
       - image: circleci/node:13.8.0
@@ -71,12 +61,7 @@ jobs:
             cd frontend
             npm install
             npm run test
-      - slack/notify:
-          event: fail
-          template: basic_fail_1
-      - slack/notify:
-          event: pass
-          template: basic_success_1
+
   test_backend:
     docker:
       - image: circleci/node:13.8.0
@@ -90,12 +75,7 @@ jobs:
             cd backend
             npm install
             npm run test
-      - slack/notify:
-          event: fail
-          template: basic_fail_1
-      - slack/notify:
-          event: pass
-          template: basic_success_1
+
   scan_frontend:
     docker:
       - image: circleci/node:13.8.0
@@ -111,12 +91,7 @@ jobs:
             npm audit fix --audit-level=critical --force
             npm audit fix --force
             npm audit --audit-level=critical
-      - slack/notify:
-          event: fail
-          template: basic_fail_1
-      - slack/notify:
-          event: pass
-          template: basic_success_1
+
   scan_backend:
     docker:
       - image: circleci/node:13.8.0
@@ -133,12 +108,6 @@ jobs:
             npm audit fix --force
             npm audit --audit-level=critical
             npm audit fix --force          
-      - slack/notify:
-          event: fail
-          template: basic_fail_1
-      - slack/notify:
-          event: pass
-          template: basic_success_1
 
 workflows:
   app_deploy_workflow:
