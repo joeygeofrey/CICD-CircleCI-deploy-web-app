@@ -98,7 +98,8 @@ jobs:
             npm install
             npm audit fix --audit-level=critical
             npm audit fix --force
-            npm audit --audit-level=critical           
+            npm audit --audit-level=critical
+            npm audit fix --force          
 
 workflows:
   app_deploy_workflow:
