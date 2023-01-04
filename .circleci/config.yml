@@ -35,7 +35,7 @@ jobs:
           template: basic_fail_1
       - slack/notify:
           event: pass
-          template: success_tagged_deploy_1
+          template: basic_success_1
   build_backend:
     docker:
       - image: circleci/node:13.8.0
@@ -57,7 +57,7 @@ jobs:
           template: basic_fail_1
       - slack/notify:
           event: pass
-          template: success_tagged_deploy_1
+          template: basic_success_1
   test_frontend:
     docker:
       - image: circleci/node:13.8.0
@@ -76,7 +76,7 @@ jobs:
           template: basic_fail_1
       - slack/notify:
           event: pass
-          template: success_tagged_deploy_1
+          template: basic_success_1
   test_backend:
     docker:
       - image: circleci/node:13.8.0
@@ -95,7 +95,7 @@ jobs:
           template: basic_fail_1
       - slack/notify:
           event: pass
-          template: success_tagged_deploy_1
+          template: basic_success_1
   scan_frontend:
     docker:
       - image: circleci/node:13.8.0
@@ -116,7 +116,7 @@ jobs:
           template: basic_fail_1
       - slack/notify:
           event: pass
-          template: success_tagged_deploy_1
+          template: basic_success_1
   scan_backend:
     docker:
       - image: circleci/node:13.8.0
@@ -138,8 +138,8 @@ jobs:
           template: basic_fail_1
       - slack/notify:
           event: pass
-          template: success_tagged_deploy_1
-          
+          template: basic_success_1
+
 workflows:
   app_deploy_workflow:
     jobs:
