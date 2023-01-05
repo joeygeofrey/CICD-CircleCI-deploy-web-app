@@ -143,11 +143,10 @@ jobs:
       - run:
           name: Fetch backend-instance IP into Ansible inventory
           command: |
-            export BACKEND_IP=$(aws ec2 describe-instances \
-              --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --query 'Reservations[*].Instances[*].PublicIpAddress' \
-              --output text)
-            echo $BACKEND_IP >> ansible/inventory.txt
+            aws ec2 describe-instances \
+              --query "Reservations[*].Instances[*].PublicIpAddress" \
+              --filters "Name=tag:project,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --output=text >> ansible/inventory.txt
             cat ansible/inventory.txt
       - persist_to_workspace:
           root: ~/
