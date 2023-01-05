@@ -5,7 +5,7 @@ orbs:
 
 commands:
   destroy_environment:
-    description: Destroys the CloudFormation stacks given a workflow ID
+    description: Destroys CloudFormation stacks given the workflow ID
     parameters:
       workflow_id:
         type: string
@@ -36,7 +36,6 @@ jobs:
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
-
   build_backend:
     docker:
       - image: circleci/node:13.8.0
@@ -53,7 +52,6 @@ jobs:
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
-
   test_frontend:
     docker:
       - image: circleci/node:13.8.0
@@ -67,7 +65,6 @@ jobs:
             cd frontend
             npm install
             npm run test
-
   test_backend:
     docker:
       - image: circleci/node:13.8.0
@@ -81,7 +78,6 @@ jobs:
             cd backend
             npm install
             npm run test
-
   scan_frontend:
     docker:
       - image: circleci/node:13.8.0
@@ -97,7 +93,6 @@ jobs:
             npm audit fix --audit-level=critical --force
             npm audit fix --force
             npm audit --audit-level=critical
-
   scan_backend:
     docker:
       - image: circleci/node:13.8.0
@@ -114,7 +109,6 @@ jobs:
             npm audit fix --force
             npm audit --audit-level=critical
             npm audit fix --force
-
   deploy_infrastructure:
     docker:
       - image: amazon/aws-cli
@@ -154,6 +148,24 @@ jobs:
           paths:
             - project/ansible/inventory.txt
       - destroy_environment
+  configure_infrastructure:
+    docker:
+      - image: python:3.12.0a3-alpine3.17
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints: ["7d:17:43:d1:52:e5:f1:1f:5f:29:bf:0d:d1:16:e1:87"]
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update tar gzip ansible aws-cli
+      - run:
+          name: Configure server
+          command: |
+            ansible-playbook -i ansible/inventory.txt ansible/configure-server.yml
+      - destroy_environment
 
 workflows:
   app_deploy_workflow:
@@ -170,3 +182,5 @@ workflows:
           requires: [build_backend]
       - deploy_infrastructure:
           requires: [test_frontend, test_backend, scan_frontend, scan_backend]
+      - configure_infrastructure:
+          requires: [deploy_infrastructure]
