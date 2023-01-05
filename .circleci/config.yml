@@ -4,15 +4,6 @@ orbs:
   slack: circleci/slack@4.12.0
 
 commands:
-  install_awscli:
-    description: Installs the AWS CLI
-    steps:
-      - run: 
-          name: Install AWS CLI
-          command: |
-            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-            unzip awscliv2.zip
-            sudo ./aws/install
   destroy_environment:
     description: Destroys the CloudFormation stacks given a workflow ID
     parameters:
@@ -130,10 +121,9 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install Tar Gzip
+          name: Install tar gzip
           command: |
             yum -y install tar gzip
-      - install_awscli
       - run:
           name: Backend infrastructure check
           command: |
@@ -177,4 +167,5 @@ workflows:
           requires: [build_frontend]
       - scan_backend:
           requires: [build_backend]
-      - deploy_infrastructure
+      - deploy_infrastructure:
+          requires: [test_frontend, test_backend, scan_frontend, scan_backend]
