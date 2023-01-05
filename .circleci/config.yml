@@ -4,14 +4,29 @@ orbs:
   slack: circleci/slack@4.12.0
 
 commands:
+  install_awscli:
+    description: Installs the AWS CLI
+    steps:
+      - run: 
+          name: Install AWS CLI
+          command: |
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
   destroy_environment:
+    description: Destroys the CloudFormation stacks given a workflow ID
+    parameters:
+      workflow_id:
+        type: string
+        default: ${CIRCLE_WORKFLOW_ID:0:7}
     steps:
       - run:
           name: Destroy Ennvironment
           when: on_fail
           command: |
-            aws cloudformation delete-stack --stack-name YOURSTACKNAMEHERE-${CIRCLE_WORKFLOW_ID:0:7}
-            exit 1
+            aws cloudformation delete-stack --stack-name udapeople-backend-<< parameters.Workflow_ID >>
+            aws s3 rm s3://udapeople-<<parameters.Workflow_ID>> --recursive
+            aws cloudformation delete-stack --stack-name udapeople-frontend-<< parameters.Workflow_ID >>
 
 jobs:
   build_frontend:
@@ -107,7 +122,47 @@ jobs:
             npm audit fix --audit-level=critical
             npm audit fix --force
             npm audit --audit-level=critical
-            npm audit fix --force          
+            npm audit fix --force
+
+  deploy_infrastructure:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Install Tar Gzip
+          command: |
+            yum -y install tar gzip
+      - install_awscli
+      - run:
+          name: Backend infrastructure check
+          command: |
+            aws cloudformation deploy \
+              --template-file cloudformation/backend.yml \
+              --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  \
+              --tags project=udapeople
+      - run:
+          name: Frontend infrastructure check
+          command: |
+            aws cloudformation deploy \
+              --template-file cloudformation/frontend.yml \
+              --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  \
+              --tags project=udapeople
+      - run:
+          name: Fetch backend IP into Ansible inventory
+          command: |
+            Backend_IP=$(aws ec2 describe-instances \
+              --query 'Reservations[*].Instances[*].PublicIpAddress' \
+              --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --output text)
+            echo $Backend_IP >> ansible/inventory.txt
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project/ansible/inventory.txt
+      - destroy_environment
 
 workflows:
   app_deploy_workflow:
@@ -122,3 +177,4 @@ workflows:
           requires: [build_frontend]
       - scan_backend:
           requires: [build_backend]
+      - deploy_infrastructure
