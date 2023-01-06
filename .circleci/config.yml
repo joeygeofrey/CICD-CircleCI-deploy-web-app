@@ -15,6 +15,7 @@ commands:
           name: Destroy Ennvironment
           when: on_fail
           command: |
+            echo "Destroying environment: << parameters.workflow_id >> "
             aws cloudformation delete-stack --stack-name udapeople-backend-<< parameters.workflow_id >>
             aws s3 rm s3://udapeople-<<parameters.workflow_id>> --recursive
             aws cloudformation delete-stack --stack-name udapeople-frontend-<< parameters.workflow_id >>
@@ -83,6 +84,9 @@ jobs:
             cd frontend
             npm i
             npm run test
+      - save_cache:
+          paths: [frontend/node_modules]
+          key: frontend-build
   test_backend:
     docker:
       - image: circleci/node:13.8.0
@@ -96,6 +100,9 @@ jobs:
             cd backend
             npm i
             npm run test
+      - save_cache:
+          paths: [backend/node_modules]
+          key: backend-build
   scan_frontend:
     docker:
       - image: circleci/node:13.8.0
@@ -111,6 +118,9 @@ jobs:
             npm audit fix --audit-level=critical --force
             npm audit fix --force
             npm audit --audit-level=critical
+      - save_cache:
+          paths: [frontend/node_modules]
+          key: frontend-build
   scan_backend:
     docker:
       - image: circleci/node:13.8.0
@@ -127,6 +137,9 @@ jobs:
             npm audit fix --force
             npm audit --audit-level=critical
             npm audit fix --force
+      - save_cache:
+          paths: [backend/node_modules]
+          key: backend-build
   deploy_infrastructure:
     docker:
       - image: amazon/aws-cli
