@@ -1,0 +1,43 @@
+---
+# Tasks for deploying the backend
+- name: Update and upgrade apt
+  become: true
+  apt:
+    update_cache: yes
+    upgrade: 'yes'
+- name: Install nodejs and npm
+  become: true
+  apt:
+    name: ["nodejs", "npm"]
+    state: latest
+    update_cache: yes
+- name: Install pm2
+  become: true
+  npm:
+    name: pm2
+    global: yes
+    production: yes
+    state: present
+- name: Create directory for backend
+  file:
+    path: /home/ubuntu/backend
+    state: directory
+- name: Copy backend files to new directory
+  become: true
+  copy:
+    src: /root/project/artifact.tar.gz
+    dest: /home/ubuntu/backend
+- name: Unarchive backend files
+  unarchive:
+    src: /home/ubuntu/backend/artifact.tar.gz
+    dest: /home/ubuntu/backend
+    copy: no
+- name: Install dependencies
+  shell: |
+    cd home/ubuntu/backend
+    npm i
+    npm run build
+- name: Run backend
+  shell: |
+    cd home/ubuntu/backend
+    pm2 start npm --name backend -- start
