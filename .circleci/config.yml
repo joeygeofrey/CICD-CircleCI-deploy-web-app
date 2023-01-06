@@ -175,6 +175,8 @@ jobs:
           fingerprints: ["d4:84:77:4a:73:9e:2f:ec:95:a8:ac:e3:81:f5:45:1d"]
       - attach_workspace:
           at: ~/
+      - restore_cache:
+          keys: [backend-build]
       - run:
           name: Install dependencies
           command: |
@@ -205,6 +207,41 @@ jobs:
             fi
       - destroy_environment
       - revert_migrations
+  deploy_frontend:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - restore_cache:
+          keys: [frontend-build]
+      - run:
+          name: Install dependencies
+          command: |
+            sudo apt update
+            sudo apt install -y python3
+            sudo apt intsall -y awscli
+            sudo apt install -y nodejs
+      - run:
+          name: Fetch backend url
+          command: |
+            export BACKEND_IP=$(aws ec2 describe-instances \
+              --query 'Reservations[*].Instances[*].PublicIpAddress' \
+              --filters Name=tag:aws:cloudformation:stack-name,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7} \
+              --output text)
+            export API_URL="http://${BACKEND_IP}:3030"
+            echo "API_URL = ${API_URL}"
+            echo "API_URL=http://${BACKEND_IP}:3030" >> frontend/.env
+            cat frontend/.env
+      - run:
+          name: Deploy frontend objects
+          command: |
+            cd frontend
+            npm install
+            npm run build
+            tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
+            aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
+      - destroy_environment
+      - revert_migrations
 
 workflows:
   app_deploy_workflow:
@@ -225,3 +262,5 @@ workflows:
           requires: [deploy_infrastructure]
       - run_migrations:
           requires: [configure_infrastructure]
+      - deploy_frontend:
+          requires: [run_migrations]
