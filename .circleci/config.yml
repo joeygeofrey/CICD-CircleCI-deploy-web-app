@@ -172,7 +172,7 @@ jobs:
     steps:
       - checkout
       - add_ssh_keys:
-          fingerprints: ["d4:84:77:4a:73:9e:2f:ec:95:a8:ac:e3:81:f5:45:1d"]
+          fingerprints: ["d7:4f:f3:f8:b8:e5:b4:21:f0:b4:da:ca:71:73:27:ad"]
       - attach_workspace:
           at: ~/
       - restore_cache:
@@ -219,7 +219,7 @@ jobs:
           command: |
             sudo apt update
             sudo apt install -y python3
-            sudo apt intsall -y awscli
+            sudo apt install -y awscli
             sudo apt install -y nodejs
       - run:
           name: Fetch backend url
