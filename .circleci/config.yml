@@ -29,7 +29,7 @@ commands:
           name: Revert migrations
           when: on_fail
           command: |
-            SUCCESS=$(curl --insecure  https://kvdb.io/2ioGGtEVLW7MDPtpRGojVM/migration_<< parameters.workflow_id >>)
+            SUCCESS=$(curl --insecure https://kvdb.io/2ioGGtEVLW7MDPtpRGojVM/migration_<< parameters.workflow_id >>)
             if(( $SUCCESS==1 )); 
             then
               cd ~/project/backend
@@ -260,16 +260,19 @@ jobs:
             pip3 install --upgrade pip
             pip3 install awscli
       - run:
-          name: Package & deploy backend 
+          name: Package backend 
           command: |
             cd backend
             npm i
             npm run build
             cd ..
             tar -C backend -czvf artifact.tar.gz .
-            mv artifact.tar.gz ansible/roles/deploy/files
+            mv artifact.tar.gz ansible/roles/deploy/files/artifact.tar.gz
+      - run:
+          name: Deploy backend
+          command: |
             cd ansible
-            echo "Contents  of the inventory.txt file is -------"
+            echo "Contents of the inventory.txt file"
             cat inventory.txt
             ansible-playbook -i inventory.txt deploy-backend.yml
       - destroy_environment
