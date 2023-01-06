@@ -19,7 +19,7 @@ commands:
             aws s3 rm s3://udapeople-<<parameters.workflow_id>> --recursive
             aws cloudformation delete-stack --stack-name udapeople-frontend-<< parameters.workflow_id >>
   revert_migrations:
-    description: Revert migrations
+    description: Revert last migration
     parameters:
       workflow_id:
         type: string
@@ -29,7 +29,7 @@ commands:
           name: Revert migrations
           when: on_fail
           command: |
-            SUCCESS=$(curl -sk https://kvdb.io/2ioGGtEVLW7MDPtpRGojVM/migration_<< parameters.workflow_id >>)
+            SUCCESS=$(curl --insecure  https://kvdb.io/2ioGGtEVLW7MDPtpRGojVM/migration_<< parameters.workflow_id >>)
             if(( $SUCCESS==1 )); 
             then
               cd ~/project/backend
@@ -187,7 +187,7 @@ jobs:
       - destroy_environment
   run_migrations:
     docker:
-      - image: circleci/node:13.8.0
+      - image: circleci/node:14.18.1
     steps:
       - checkout
       - run:
