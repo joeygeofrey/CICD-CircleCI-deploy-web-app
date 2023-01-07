@@ -32,6 +32,7 @@
     dest: /home/ubuntu/backend
     copy: no
 - name: Install node & build package
+  become: true
   shell: |
     cd home/ubuntu/backend
     npm i
