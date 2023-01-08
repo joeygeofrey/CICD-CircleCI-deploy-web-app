@@ -451,9 +451,6 @@ jobs:
             export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" \
               --stack-status-filter CREATE_COMPLETE --no-paginate --output text))
             echo Stack names: "${STACKS[@]}"
-      - run:
-          name: Remove former stacks
-          command: |
             if [[ "${CIRCLE_WORKFLOW_ID:0:7}" =~ "${OldWorkflowID}" ]]
             then
               echo "Removing former stacks"
@@ -464,6 +461,9 @@ jobs:
             else
               echo "Removal is not needed"
             fi
+      #- run:
+          #name: Remove former stacks
+          #command: |
       - slack/notify:
           event: fail
           template: basic_fail_1
