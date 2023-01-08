@@ -21,7 +21,6 @@ Resources:
             Id: webpage
             CustomOriginConfig:
               HTTPPort: 80
-              HTTPSPort: 443
               OriginProtocolPolicy: http-only
         Enabled: True
         DefaultRootObject: index.html
