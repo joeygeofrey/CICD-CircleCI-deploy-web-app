@@ -431,7 +431,7 @@ jobs:
       - slack/notify:
            event: pass
            template: basic_success_1
-  cleanup:
+  cleanup_stacks:
     docker:
       - image: amazon/aws-cli
     steps:
@@ -445,7 +445,7 @@ jobs:
           command: |
             export OldWorkflowID=$(aws cloudformation \
               list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
-              --no-paginate --output text)
+              --region us-east-1 --no-paginate --output text)
             echo OldWorkflowID: "${OldWorkflowID}"
             echo CIRCLE_WORKFLOW_ID "${CIRCLE_WORKFLOW_ID:0:7}"
             export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" \
@@ -462,7 +462,7 @@ jobs:
               aws cloudformation delete-stack --stack-name "udapeople-frontend-${OldWorkflowID}"
               echo "Successfully removed former stacks!"
             else
-              echo "Stack removal is not necessary"
+              echo "Removal is not needed"
             fi
       - slack/notify:
           event: fail
@@ -472,7 +472,7 @@ jobs:
            template: basic_success_1
 
 workflows:
-  app_deploy_workflow:
+  UdaPeople_Deployment_Pipeline:
     jobs:
       - build_frontend
       - build_backend
@@ -501,5 +501,5 @@ workflows:
           requires: [deploy_frontend, deploy_backend]
       - cloudfront_update:
           requires: [smoke_test]
-      - cleanup:
+      - cleanup_stacks:
           requires: [cloudfront_update]
