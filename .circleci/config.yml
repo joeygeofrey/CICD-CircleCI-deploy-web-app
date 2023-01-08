@@ -87,6 +87,12 @@ jobs:
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
+      - slack/notify:
+           event: pass
+           template: basic_success_1
   test_backend:
     docker:
       - image: circleci/node:13.8.0
@@ -103,6 +109,12 @@ jobs:
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
+      - slack/notify:
+           event: pass
+           template: basic_success_1
   scan_frontend:
     docker:
       - image: circleci/node:13.8.0
@@ -121,6 +133,12 @@ jobs:
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
+      - slack/notify:
+           event: pass
+           template: basic_success_1
   scan_backend:
     docker:
       - image: circleci/node:13.8.0
@@ -140,6 +158,12 @@ jobs:
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
+      - slack/notify:
+           event: pass
+           template: basic_success_1
   deploy_infrastructure:
     docker:
       - image: amazon/aws-cli
@@ -179,6 +203,12 @@ jobs:
           paths:
             - project/ansible/inventory.txt
       - destroy_environment
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
+      - slack/notify:
+           event: pass
+           template: basic_success_1
   configure_infrastructure:
     docker:
       - image: python:3.11-rc-alpine
@@ -200,6 +230,12 @@ jobs:
             cd ansible
             ansible-playbook -i inventory.txt configure-server.yml
       - destroy_environment
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
+      - slack/notify:
+           event: pass
+           template: basic_success_1
   run_migrations:
     docker:
       - image: circleci/node:14.18.1
@@ -220,6 +256,12 @@ jobs:
             fi
       - destroy_environment
       - revert_migrations
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
+      - slack/notify:
+           event: pass
+           template: basic_success_1
   deploy_frontend:
     docker:
       - image: circleci/node:13.8.0
@@ -256,6 +298,12 @@ jobs:
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
       - destroy_environment
       - revert_migrations
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
+      - slack/notify:
+           event: pass
+           template: basic_success_1
   deploy_backend:
     docker:
       - image: python:3.11-rc-alpine
@@ -288,8 +336,14 @@ jobs:
             echo "Contents of the inventory.txt file"
             cat inventory.txt
             ansible-playbook -i inventory.txt deploy-backend.yml
-      #- destroy_environment
-      #- revert_migrations
+      - destroy_environment
+      - revert_migrations
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
+      - slack/notify:
+           event: pass
+           template: basic_success_1
 
 workflows:
   app_deploy_workflow:
