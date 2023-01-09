@@ -279,7 +279,7 @@ jobs:
             sudo apt install -y nodejs
             sudo apt install -y curl
       - run:
-          name: Fetch backend url
+          name: Fetch backend url & deploy frontend objects
           command: |
             export BACKEND_IP=$(aws ec2 describe-instances \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
@@ -289,9 +289,6 @@ jobs:
             echo "API_URL = ${API_URL}"
             echo "API_URL=http://${BACKEND_IP}:3030" >> frontend/.env
             cat frontend/.env
-      - run:
-          name: Deploy frontend objects
-          command: |
             cd frontend
             npm i
             npm run build
@@ -416,6 +413,18 @@ jobs:
           command: |
             yum -y install tar gzip curl
       - run:
+          name: Store old WorkflowID
+          command: |
+            aws cloudformation \
+            list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
+            --no-paginate --output text > ~/oldworkflowid.txt
+            export WorkflowID=$(cat ~/oldworkflowid.txt)
+            echo WorkflowID: "$WorkflowID"
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - oldworkflowid.txt
+      - run:
           name: Change Cloudfront distribution
           command: |
             aws cloudformation deploy \
@@ -440,8 +449,10 @@ jobs:
           name: Install dependencies
           command: |
             yum -y install tar gzip curl
+      - attach_workspace:
+          at: ~/
       - run:
-          name: Fetch former stack workflow ID & names
+          name: Fetch old workflowID & stack name - remove old stacks
           command: |
             export OldWorkflowID=$(aws cloudformation \
               list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
@@ -461,9 +472,6 @@ jobs:
             else
               echo "Removal is not needed"
             fi
-      #- run:
-          #name: Remove former stacks
-          #command: |
       - slack/notify:
           event: fail
           template: basic_fail_1
