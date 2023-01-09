@@ -429,15 +429,12 @@ jobs:
       - run:
           name: Store OldWorkflowID
           command: |
-            aws cloudformation \
+            export OldWorkflowID=$(aws cloudformation \
             list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
-            --no-paginate --output text > ~/OldWorkflowID.txt
-            export WorkflowID=$(cat ~/OldWorkflowID.txt)
-            echo WorkflowID: "$WorkflowID"
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - OldWorkflowID.txt
+            --no-paginate --output text)
+            echo "OldWorkflowID: ${OldWorkflowID}"
+            echo "Stack names: ${STACKS[@]}"
+            echo ${OldWorkflowID} >> OldWorkflowID.txt
       - run:
           name: Change Cloudfront distribution
           command: |
@@ -446,6 +443,10 @@ jobs:
               --stack-name InitialStack \
               --parameter-overrides WorkflowID="udapeople-${CIRCLE_WORKFLOW_ID:0:7}" \
               --tags project=udapeople
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - OldWorkflowID.txt
       - destroy_environment
       - revert_migrations
       - slack/notify:
