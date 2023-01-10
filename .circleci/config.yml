@@ -484,7 +484,7 @@ jobs:
               aws cloudformation delete-stack --stack-name "udapeople-frontend-${OldWorkflowID:10:17}"
               echo "Successfully removed old stacks!"
             else
-              echo "No old stacks to be discovered"
+              echo "No old stacks were discovered"
             fi
       - slack/notify:
           event: fail
