@@ -2,7 +2,7 @@ Description: >
   Prometheus Server for Monitoring
 
 Parameters:
-  ID:
+  WorkflowID:
     Description: Unique identifier.
     Type: String
 
@@ -20,6 +20,7 @@ Resources:
         - IpProtocol: tcp
           FromPort: 9090
           ToPort: 9090
+          CidrIp: 0.0.0.0/0
         - IpProtocol: tcp
           FromPort: 9093
           ToPort: 9093
@@ -40,7 +41,7 @@ Resources:
         - Key: Name
           Value: !Sub PrometheusServer-UdaPeople
       UserData:
-        Fn:Base64:
+        Fn::Base64:
           !Sub |
             #!/bin/bash
             sudo apt-get update
