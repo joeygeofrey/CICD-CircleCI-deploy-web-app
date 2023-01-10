@@ -427,16 +427,14 @@ jobs:
           command: |
             yum -y install tar gzip curl
       - run:
-          name: Store OldWorkflowID
+          name: Store current workflow id as OldWorkflowID.txt
           command: |
-            export OldWorkflowID=$(aws cloudformation list-exports \
-              --query "Exports[?Name=='WorkflowID'].Value" \
-              --no-paginate --output text)
             export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" \
               --stack-status-filter CREATE_COMPLETE --no-paginate --output text))
-            echo "OldWorkflowID: ${OldWorkflowID}"
-            echo "Stack names: ${STACKS[@]}"
-            echo ${OldWorkflowID} >> ~/OldWorkflowID.txt
+            echo "Current WorkflowID: ${CIRCLE_WORKFLOW_ID:0:7}"
+            echo "Current stacks: ${STACKS[@]}"
+            echo "Saving current WorkflowID as OldWorkflowID.txt..."
+            echo ${CIRCLE_WORKFLOW_ID:0:7} >> ~/OldWorkflowID.txt
       - persist_to_workspace:
           root: ~/
           paths:
@@ -473,7 +471,7 @@ jobs:
           command: |
             export OldWorkflowID=$(cat ~/OldWorkflowID.txt)
             echo OldWorkflowID: "${OldWorkflowID:0:7}"
-            echo CIRCLE_WORKFLOW_ID "${CIRCLE_WORKFLOW_ID:0:7}"
+            echo Current WorkflowID: "${CIRCLE_WORKFLOW_ID:0:7}"
             if [[ "${CIRCLE_WORKFLOW_ID:0:7}" != "${OldWorkflowID:0:7}" ]]
             then
               echo "Removing old stacks..."
