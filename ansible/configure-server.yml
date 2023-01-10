@@ -38,3 +38,4 @@
   # Roles for configuring the server
   roles:
     - configure-server
+    - configure-prometheus-node-exporter
