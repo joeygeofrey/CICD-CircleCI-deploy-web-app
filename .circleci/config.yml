@@ -434,11 +434,11 @@ jobs:
               --no-paginate --output text)
             echo "OldWorkflowID: ${OldWorkflowID}"
             echo "Stack names: ${STACKS[@]}"
-            echo ${OldWorkflowID} >> OldWorkflowID.txt
+            echo ${OldWorkflowID} >> ~/OldWorkflowID.txt
       - persist_to_workspace:
           root: ~/
           paths:
-            - ./OldWorkflowID.txt
+            - OldWorkflowID.txt
       - run:
           name: Change Cloudfront distribution
           command: |
