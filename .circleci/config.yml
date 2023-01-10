@@ -438,7 +438,7 @@ jobs:
       - persist_to_workspace:
           root: ~/
           paths:
-            - OldWorkflowID.txt
+            - ./OldWorkflowID.txt
       - run:
           name: Change Cloudfront distribution
           command: |
