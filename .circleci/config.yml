@@ -469,7 +469,7 @@ jobs:
       - run:
           name: Fetch the old stack and remove stack
           command: |
-            export OldWorkflowID=$(cat OldWorkflowID.txt)
+            export OldWorkflowID=$(cat ~/OldWorkflowID.txt)
             export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" \
               --stack-status-filter CREATE_COMPLETE --no-paginate --output text))
             echo OldWorkflowID: "${OldWorkflowID:10:17}"
