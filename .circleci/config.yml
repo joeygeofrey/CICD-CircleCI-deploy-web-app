@@ -471,9 +471,9 @@ jobs:
           name: Fetch the old stack and remove stack
           command: |
             export OldWorkflowID=$(cat ~/OldWorkflowID.txt)
-            echo OldWorkflowID: "${OldWorkflowID:10:17}"
-            echo Current WorkflowID: "${CIRCLE_WORKFLOW_ID:0:7}"
             echo "Checking if there are old stacks to be removed..."
+            echo Old Workflow ID: "${OldWorkflowID:10:17}"
+            echo Current Workflow ID: "${CIRCLE_WORKFLOW_ID:0:7}"
             if [[ "${CIRCLE_WORKFLOW_ID:0:7}" != "${OldWorkflowID:10:17}" ]]
             then
               echo "Removing old stacks..."
