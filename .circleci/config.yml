@@ -471,8 +471,11 @@ jobs:
           name: Fetch the old stack and remove stack
           command: |
             export OldWorkflowID=$(cat ~/OldWorkflowID.txt)
+            export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" \
+              --stack-status-filter CREATE_COMPLETE --no-paginate --output text))
             echo "Checking if there are old stacks to be removed..."
             echo Old Workflow ID: "${OldWorkflowID:10:17}"
+            echo "Current stacks: ${STACKS[@]}"
             echo Current Workflow ID: "${CIRCLE_WORKFLOW_ID:0:7}"
             if [[ "${CIRCLE_WORKFLOW_ID:0:7}" != "${OldWorkflowID:10:17}" ]]
             then
