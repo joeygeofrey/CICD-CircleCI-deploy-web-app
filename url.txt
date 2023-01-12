@@ -1,2 +1,2 @@
 GitHub Project Repo: https://github.com/joeygeofrey/CICD-auto-deploy-app
-S3 Bucket (Green Candidate Front-end): http://udapeople-15c7089.s3.amazonaws.com/index.html#/employees
+S3 Bucket (Green Candidate Front-end): http://udapeople-dc6df10.s3.amazonaws.com/index.html#/employees
