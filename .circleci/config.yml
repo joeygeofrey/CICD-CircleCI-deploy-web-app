@@ -5,7 +5,7 @@ orbs:
 
 commands:
   destroy_environment:
-    description: Destroys CloudFormation stacks given the workflow ID
+    description: Destroys the CloudFormation stacks when given the workflow ID
     parameters:
       workflow_id:
         type: string
@@ -37,6 +37,18 @@ commands:
               npm i
               npm run migrations:revert
             fi
+  slack_notify_fail:
+    description: Notifies slack channel upon job failure
+    steps:
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
+  slack_notify_pass:
+    description: Notifies slack channel upon job success
+    steps:
+      - slack/notify:
+          event: pass
+          template: basic_success_1 
 
 jobs:
   build_frontend:
@@ -55,6 +67,7 @@ jobs:
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
+      - slack_notify_fail
   build_backend:
     docker:
       - image: circleci/node:13.8.0
@@ -71,6 +84,7 @@ jobs:
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
+      - slack_notify_fail
   test_frontend:
     docker:
       - image: circleci/node:13.8.0
@@ -87,12 +101,7 @@ jobs:
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
-      - slack/notify:
-          event: fail
-          template: basic_fail_1
-      - slack/notify:
-           event: pass
-           template: basic_success_1
+      - slack_notify_fail
   test_backend:
     docker:
       - image: circleci/node:13.8.0
@@ -109,12 +118,7 @@ jobs:
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
-      - slack/notify:
-          event: fail
-          template: basic_fail_1
-      - slack/notify:
-           event: pass
-           template: basic_success_1
+      - slack_notify_fail
   scan_frontend:
     docker:
       - image: circleci/node:13.8.0
@@ -128,17 +132,10 @@ jobs:
             cd frontend
             npm i
             npm audit fix --audit-level=critical --force
-            npm audit fix --force
-            npm audit --audit-level=critical
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
-      - slack/notify:
-          event: fail
-          template: basic_fail_1
-      - slack/notify:
-           event: pass
-           template: basic_success_1
+      - slack_notify_fail
   scan_backend:
     docker:
       - image: circleci/node:13.8.0
@@ -158,12 +155,7 @@ jobs:
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
-      - slack/notify:
-          event: fail
-          template: basic_fail_1
-      - slack/notify:
-           event: pass
-           template: basic_success_1
+      - slack_notify_fail
   deploy_infrastructure:
     docker:
       - image: amazon/aws-cli
@@ -203,12 +195,7 @@ jobs:
           paths:
             - project/ansible/inventory.txt
       - destroy_environment
-      - slack/notify:
-          event: fail
-          template: basic_fail_1
-      - slack/notify:
-           event: pass
-           template: basic_success_1
+      - slack_notify_fail
   configure_infrastructure:
     docker:
       - image: python:3.11-rc-alpine
@@ -230,12 +217,7 @@ jobs:
             cd ansible
             ansible-playbook -i inventory.txt configure-server.yml
       - destroy_environment
-      - slack/notify:
-          event: fail
-          template: basic_fail_1
-      - slack/notify:
-           event: pass
-           template: basic_success_1
+      - slack_notify_fail
   run_migrations:
     docker:
       - image: circleci/node:13.8.0
@@ -268,12 +250,7 @@ jobs:
             fi
       - destroy_environment
       - revert_migrations
-      - slack/notify:
-          event: fail
-          template: basic_fail_1
-      - slack/notify:
-           event: pass
-           template: basic_success_1
+      - slack_notify_fail
   deploy_frontend:
     docker:
       - image: circleci/node:13.8.0
@@ -308,12 +285,7 @@ jobs:
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
       - destroy_environment
       - revert_migrations
-      - slack/notify:
-          event: fail
-          template: basic_fail_1
-      - slack/notify:
-           event: pass
-           template: basic_success_1
+      - slack_notify_fail
   deploy_backend:
     docker:
       - image: python:3.11-rc-alpine
@@ -366,12 +338,7 @@ jobs:
             ansible-playbook -i inventory.txt deploy-backend.yml
       - destroy_environment
       - revert_migrations
-      - slack/notify:
-          event: fail
-          template: basic_fail_1
-      - slack/notify:
-           event: pass
-           template: basic_success_1
+      - slack_notify_fail
   smoke_test:
     docker:
       - image: python:3.11-rc-alpine
@@ -411,12 +378,7 @@ jobs:
             fi
       - destroy_environment
       - revert_migrations
-      - slack/notify:
-          event: fail
-          template: basic_fail_1
-      - slack/notify:
-           event: pass
-           template: basic_success_1
+      - slack_notify_fail
   cloudfront_update:
     docker:
       - image: amazon/aws-cli
@@ -450,12 +412,8 @@ jobs:
               --tags project=udapeople
       - destroy_environment
       - revert_migrations
-      - slack/notify:
-          event: fail
-          template: basic_fail_1
-      - slack/notify:
-           event: pass
-           template: basic_success_1
+      - slack_notify_fail
+      - slack_notify_pass
   cleanup_stacks:
     docker:
       - image: amazon/aws-cli
@@ -487,12 +445,8 @@ jobs:
             else
               echo "No old stacks were discovered"
             fi
-      - slack/notify:
-          event: fail
-          template: basic_fail_1
-      - slack/notify:
-           event: pass
-           template: basic_success_1
+      - slack_notify_fail
+      - slack_notify_pass
 
 workflows:
   UdaPeople_Deployment_Pipeline:
